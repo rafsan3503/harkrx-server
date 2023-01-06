@@ -48,11 +48,11 @@ async function run() {
 
     // get logged in user
     app.get("/single-user", async (req, res) => {
-      const email = req.query;
+      const email = req.query.email;
 
-      const query = { email: email };
+      const query = { email };
       const user = await usersCollections.findOne(query);
-      console.log(query);
+      res.send(user);
     });
 
     // get single user
