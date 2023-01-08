@@ -41,14 +41,27 @@ async function run() {
 
     // get all user
     app.get("/users", async (req, res) => {
+      const loggedUser = req.query.email;
+      // console.log(loggedUser);
       const query = {};
       const users = await usersCollections.find(query).toArray();
-      res.send(users);
+      const unfollowedUser = users.filter(user => user.email !== loggedUser);
+      // console.log(unfollowedUser);
+      res.send(unfollowedUser);
     });
+
+    // get users without loggedIn user
+    // app.get('/users', async (req, res) => {
+    //   const loggedUser = req.query;
+    //   // console.log(loggedUser);
+    //   const userList = usersCollections.find(users => users.email != loggedUser.email);
+    //   console.log(userList);
+    // })
 
     // get logged in user
     app.get("/single-user", async (req, res) => {
       const email = req.query.email;
+      // console.log(email);
 
       const query = { email };
       const user = await usersCollections.findOne(query);
