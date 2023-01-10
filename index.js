@@ -45,7 +45,7 @@ async function run() {
       // console.log(loggedUser);
       const query = {};
       const users = await usersCollections.find(query).toArray();
-      const unfollowedUser = users.filter(user => user.email !== loggedUser);
+      const unfollowedUser = users.filter((user) => user.email !== loggedUser);
       // console.log(unfollowedUser);
       res.send(unfollowedUser);
     });
@@ -73,6 +73,50 @@ async function run() {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
       const result = await usersCollections.findOne(query);
+      res.send(result);
+    });
+
+    // update about
+    app.put("/about/:id", async (req, res) => {
+      const about = req.body.about;
+
+      const id = req.params.id;
+      console.log(id);
+      const query = { _id: ObjectId(id) };
+      const updatedDoc = {
+        $set: {
+          about: about,
+        },
+      };
+      const options = { upsert: true };
+      const result = await usersCollections.updateOne(
+        query,
+        updatedDoc,
+        options
+      );
+      res.send(result);
+    });
+
+    // update information
+    app.put("/information/:id", async (req, res) => {
+      const id = req.params.id;
+      const name = req.body.name;
+      const headline = req.body.headline;
+      const address = req.body.address;
+      const query = { _id: ObjectId(id) };
+      const updatedDoc = {
+        $set: {
+          name,
+          headline,
+          address,
+        },
+      };
+      const options = { upsert: true };
+      const result = await usersCollections.updateOne(
+        query,
+        updatedDoc,
+        options
+      );
       res.send(result);
     });
   } finally {
