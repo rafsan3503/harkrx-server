@@ -42,12 +42,15 @@ async function run() {
     // get all user
     app.get("/users", async (req, res) => {
       const loggedUser = req.query.email;
+      const count = req.query.count;
+      console.log(count, loggedUser);
       // console.log(loggedUser);
       const query = {};
       const users = await usersCollections.find(query).toArray();
       const unfollowedUser = users.filter((user) => user.email !== loggedUser);
       // console.log(unfollowedUser);
-      res.send(unfollowedUser);
+
+      return res.send(unfollowedUser);
     });
 
     // get users without loggedIn user
@@ -141,6 +144,25 @@ async function run() {
       res.send(result);
     });
 
+    app.put("/cover/:id", async (req, res) => {
+      const img = req.body.img;
+      const id = req.params.id;
+      console.log(id);
+
+      const query = { _id: ObjectId(id) };
+      const updatedDoc = {
+        $set: {
+          cover: img,
+        },
+      };
+      const options = { upsert: true };
+      const result = await usersCollections.updateOne(
+        query,
+        updatedDoc,
+        options
+      );
+      res.send(result);
+    });
   } finally {
   }
 }
