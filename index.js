@@ -119,6 +119,28 @@ async function run() {
       );
       res.send(result);
     });
+
+    //update profile pic
+    app.put("/picture/:id", async (req, res) => {
+      const img = req.body.img;
+      const id = req.params.id;
+      console.log(id);
+
+      const query = { _id: ObjectId(id) };
+      const updatedDoc = {
+        $set: {
+          img: img,
+        },
+      };
+      const options = { upsert: true };
+      const result = await usersCollections.updateOne(
+        query,
+        updatedDoc,
+        options
+      );
+      res.send(result);
+    });
+
   } finally {
   }
 }
