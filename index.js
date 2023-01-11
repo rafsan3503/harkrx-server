@@ -79,7 +79,7 @@ async function run() {
     // update about
     app.put("/about/:id", async (req, res) => {
       const about = req.body.about;
-
+      console.log(about);
       const id = req.params.id;
       console.log(id);
       const query = { _id: ObjectId(id) };
