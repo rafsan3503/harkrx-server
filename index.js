@@ -22,7 +22,10 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
+    // userCollection
     const usersCollections = client.db("harkrx").collection("users");
+    // post collection
+    const postCollections = client.db("harkrx").collection("posts");
 
     // post a user
     app.post("/users", async (req, res) => {
@@ -199,6 +202,23 @@ async function run() {
         updatedDoc,
         options
       );
+      res.send(result);
+    });
+
+    // create post
+    app.post("/post", async (req, res) => {
+      const post = req.body;
+      const result = await postCollections.insertOne(post);
+      res.send(result);
+    });
+
+    // get all posts
+    app.get("/posts", async (req, res) => {
+      const query = {};
+      const result = await await postCollections
+        .find(query)
+        .sort({ date: -1 })
+        .toArray();
       res.send(result);
     });
   } finally {
