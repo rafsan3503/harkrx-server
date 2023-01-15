@@ -236,7 +236,7 @@ async function run() {
       }
       const updatedDoc = {
         $set: {
-          likes: [authorId],
+          likes: [...likes, authorId],
         },
       };
       const result = await postCollections.updateOne(
