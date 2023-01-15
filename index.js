@@ -234,11 +234,27 @@ async function run() {
       if (existsLike) {
         return res.send({ message: "You already like this post" });
       }
+      if (likes) {
+        const updatedDoc = {
+          $set: {
+            likes: [...likes, authorId],
+          },
+        };
+
+        const result = await postCollections.updateOne(
+          query,
+          updatedDoc,
+          options
+        );
+        return res.send(result);
+      }
+
       const updatedDoc = {
         $set: {
-          likes: [...likes, authorId],
+          likes: [authorId],
         },
       };
+
       const result = await postCollections.updateOne(
         query,
         updatedDoc,
