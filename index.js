@@ -221,6 +221,134 @@ async function run() {
         .toArray();
       res.send(result);
     });
+
+    // like post
+    app.put("/like/:id", async (req, res) => {
+      const id = req.params.id;
+      const authorId = req.body.authorId;
+      const query = { _id: ObjectId(id) };
+      const post = await postCollections.findOne(query);
+      const options = { upsert: true };
+      const likes = post.likes;
+      const existsLike = likes?.find((like) => like === authorId);
+      if (existsLike) {
+        return res.send({ message: "You already like this post" });
+      }
+      const updatedDoc = {
+        $set: {
+          likes: [authorId],
+        },
+      };
+      const result = await postCollections.updateOne(
+        query,
+        updatedDoc,
+        options
+      );
+      res.send(result);
+    });
+
+    // comment post
+    app.put("/comment/:id", async (req, res) => {
+      const id = req.params.id;
+      const comment = req.body;
+      const query = { _id: ObjectId(id) };
+      const post = await postCollections.findOne(query);
+      const comments = post.comments;
+      const options = { upsert: true };
+      if (comments) {
+        const updatedDoc = {
+          $set: {
+            comments: [...comments, comment],
+          },
+        };
+        const result = await postCollections.updateOne(
+          query,
+          updatedDoc,
+          options
+        );
+        return res.send(result);
+      }
+      const updatedDoc = {
+        $set: {
+          comments: [comment],
+        },
+      };
+      const result = await postCollections.updateOne(
+        query,
+        updatedDoc,
+        options
+      );
+      res.send(result);
+    });
+
+    // reort post
+    app.put("/report/:id", async (req, res) => {
+      const id = req.params.id;
+      const reportUserId = req.body.reportUserId;
+      const query = { _id: ObjectId(id) };
+      const post = await postCollections.findOne(query);
+      const options = { upsert: true };
+      const reports = post.reports;
+      const existsReport = reports?.find((report) => report === reportUserId);
+      if (existsReport) {
+        return res.send({ message: "You already report this post" });
+      }
+      const updatedDoc = {
+        $set: {
+          reports: [reportUserId],
+        },
+      };
+      const result = await postCollections.updateOne(
+        query,
+        updatedDoc,
+        options
+      );
+      res.send(result);
+    });
+
+    // verify request user
+    app.put("/verify-request/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const options = { upsert: true };
+      const updatedDoc = {
+        $set: {
+          verificationStatus: "pending",
+        },
+      };
+      const result = await usersCollections.updateOne(
+        query,
+        updatedDoc,
+        options
+      );
+      res.send(result);
+    });
+
+    // verify user
+    app.put("/verify-user/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const options = { upsert: true };
+      const updatedDoc = {
+        $set: {
+          verificationStatus: "verified",
+        },
+      };
+      const result = await usersCollections.updateOne(
+        query,
+        updatedDoc,
+        options
+      );
+      res.send(result);
+    });
+
+    // delete post
+    app.delete("/post/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await postCollections.deleteOne(query);
+      res.send(result);
+    });
   } finally {
   }
 }
