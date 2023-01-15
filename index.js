@@ -22,7 +22,10 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
+    // userCollection
     const usersCollections = client.db("harkrx").collection("users");
+    // post collection
+    const postCollections = client.db("harkrx").collection("posts");
 
     // post a user
     app.post("/users", async (req, res) => {
@@ -42,15 +45,13 @@ async function run() {
     // get all user
     app.get("/users", async (req, res) => {
       const loggedUser = req.query.email;
-      const count = req.query.count;
-      console.log(count, loggedUser);
       // console.log(loggedUser);
       const query = {};
       const users = await usersCollections.find(query).toArray();
       const unfollowedUser = users.filter((user) => user.email !== loggedUser);
       // console.log(unfollowedUser);
 
-      return res.send(unfollowedUser);
+      res.send(unfollowedUser);
     });
 
     // get users without loggedIn user
@@ -144,6 +145,7 @@ async function run() {
       res.send(result);
     });
 
+    // update cover pic
     app.put("/cover/:id", async (req, res) => {
       const img = req.body.img;
       const id = req.params.id;
@@ -161,6 +163,62 @@ async function run() {
         updatedDoc,
         options
       );
+      res.send(result);
+    });
+
+    // add following user
+    app.put("/follow-user/:id", async (req, res) => {
+      const id = req.params.id;
+      const user = req.body;
+      const query = { _id: ObjectId(id) };
+      const getUser = await usersCollections.findOne(query);
+      let followedUser = getUser.followedUser;
+
+      const existsUser = followedUser?.find((usr) => usr.email === user.email);
+      if (existsUser) {
+        return res.send({ message: "user already added!!" });
+      }
+      const options = { upsert: true };
+      if (!followedUser) {
+        const updatedDoc = {
+          $set: {
+            followedUser: [user],
+          },
+        };
+        const result = await usersCollections.updateOne(
+          query,
+          updatedDoc,
+          options
+        );
+        return res.send(result);
+      }
+      const updatedDoc = {
+        $set: {
+          followedUser: [...followedUser, user],
+        },
+      };
+      const result = await usersCollections.updateOne(
+        query,
+        updatedDoc,
+        options
+      );
+      res.send(result);
+    });
+
+    // create post
+    app.post("/post", async (req, res) => {
+      const post = req.body;
+      const result = await postCollections.insertOne(post);
+      res.send(result);
+    });
+
+    // get all posts
+    app.get("/posts", async (req, res) => {
+      const query = {};
+      const result = await await postCollections
+        .find(query)
+        .sort({ date: -1 })
+        .toArray();
       res.send(result);
     });
   } finally {
